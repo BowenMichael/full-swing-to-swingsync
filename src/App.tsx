@@ -4,9 +4,9 @@ import { UrlInput } from './components/UrlInput.js';
 import { SessionSummary } from './components/SessionSummary.js';
 import { ExportBar } from './components/ExportBar.js';
 import { ShotTable } from './components/ShotTable.js';
-import { StatsModal } from './components/StatsModal.js';
 import { ParsedSessionData } from './types.js';
-import { AlertCircle, BarChart2 } from 'lucide-react';
+import { initGoogleAnalytics, trackEvent } from './utils/analytics.js';
+import { AlertCircle } from 'lucide-react';
 
 const DEMO_URL = 'https://myfullswinggolf.com/lm/share/5c6af3dc-9e48-412b-a041-a41726b25956';
 
@@ -16,16 +16,10 @@ export const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [sessionData, setSessionData] = useState<ParsedSessionData | null>(null);
   const [selectedClub, setSelectedClub] = useState<string | null>(null);
-  const [isStatsOpen, setIsStatsOpen] = useState(false);
 
-  // Send visitor beacon on page load
+  // Initialize Google Analytics 4
   useEffect(() => {
-    fetch('/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    }).catch(() => {
-      // Ignore background tracking errors
-    });
+    initGoogleAnalytics();
   }, []);
 
   const handleExtract = async (targetUrl = url) => {
@@ -51,10 +45,18 @@ export const App: React.FC = () => {
 
       setSessionData(resJson.data);
       setSelectedClub(null);
+
+      // Track successful extraction in GA4
+      trackEvent('extract_session', {
+        total_shots: resJson.data.session.totalShots,
+        location: resJson.data.session.location,
+        duration: resJson.data.session.duration,
+      });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An unexpected error occurred.';
       setError(msg);
       setSessionData(null);
+      trackEvent('extraction_error', { error_message: msg });
     } finally {
       setIsLoading(false);
     }
@@ -62,12 +64,13 @@ export const App: React.FC = () => {
 
   const handleLoadDemo = () => {
     setUrl(DEMO_URL);
+    trackEvent('load_demo_session');
     handleExtract(DEMO_URL);
   };
 
   return (
     <div className="app-container">
-      <Header onOpenStats={() => setIsStatsOpen(true)} />
+      <Header />
 
       <UrlInput
         url={url}
@@ -92,7 +95,10 @@ export const App: React.FC = () => {
           <SessionSummary
             data={sessionData}
             selectedClub={selectedClub}
-            setSelectedClub={setSelectedClub}
+            setSelectedClub={(club) => {
+              setSelectedClub(club);
+              if (club) trackEvent('filter_club', { club });
+            }}
           />
 
           <ExportBar data={sessionData} url={url} />
@@ -108,26 +114,7 @@ export const App: React.FC = () => {
         <p>
           Full Swing to SwingSync CSV Extractor &bull; Built with React, TypeScript & Node.js
         </p>
-        <button
-          type="button"
-          onClick={() => setIsStatsOpen(true)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'var(--text-muted)',
-            fontSize: '0.75rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.3rem',
-          }}
-        >
-          <BarChart2 size={13} color="var(--emerald-primary)" />
-          <span>View Site Traffic & Usage Stats</span>
-        </button>
       </footer>
-
-      <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} />
     </div>
   );
 };

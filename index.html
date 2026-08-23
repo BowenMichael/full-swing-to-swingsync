@@ -5,12 +5,34 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><circle cx='12' cy='12' r='10'/><path fill='white' d='M8 12l3 3 5-5'/></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#0d1117" />
-    <meta name="description" content="Extract Full Swing Golf launch monitor session data and export directly to SwingSync CSV format." />
+    <meta name="description" content="Extract Full Swing Golf launch monitor session data and export directly to SwingSync and Trackman CSV formats." />
     <title>Full Swing to SwingSync Extractor</title>
+    
     <!-- Modern Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Google Analytics 4 (GA4) Tag Loader -->
+    <!-- Set VITE_GA_MEASUREMENT_ID in your Render environment variables (e.g. G-XXXXXXXXXX) -->
+    <script>
+      (function() {
+        const gaId = "%VITE_GA_MEASUREMENT_ID%";
+        // If configured with a valid GA4 measurement ID
+        if (gaId && !gaId.startsWith("%") && gaId.startsWith("G-")) {
+          const script = document.createElement("script");
+          script.async = true;
+          script.src = "https://www.googletagmanager.com/gtag/js?id=" + gaId;
+          document.head.appendChild(script);
+
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
+          gtag("js", new Date());
+          gtag("config", gaId, { send_page_view: true });
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

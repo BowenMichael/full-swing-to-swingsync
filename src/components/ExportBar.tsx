@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Download, FileSpreadsheet, Code, Check, Target } from 'lucide-react';
 import { ParsedSessionData } from '../types.js';
+import { trackEvent } from '../utils/analytics.js';
 
 interface ExportBarProps {
   data: ParsedSessionData;
@@ -14,6 +15,13 @@ export const ExportBar: React.FC<ExportBarProps> = ({ data, url }) => {
     setDownloadingFormat(format);
     const endpoint = `/api/export/${format}?url=${encodeURIComponent(url || data.shareUrl)}`;
     
+    // Track GA4 event
+    trackEvent('download_session_data', {
+      format,
+      total_shots: data.session.totalShots,
+      session_date: data.session.formattedDate,
+    });
+
     // Create hidden anchor to trigger standard browser file download
     const a = document.createElement('a');
     a.href = endpoint;
