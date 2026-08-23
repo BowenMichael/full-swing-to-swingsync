@@ -460,6 +460,29 @@ body::before {
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
 }
 
+.btn-trackman-export {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.4rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
+  transition: all 0.2s ease;
+  min-height: 44px;
+}
+
+.btn-trackman-export:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
+}
+
 .btn-secondary-export {
   background: var(--bg-glass);
   color: var(--text-primary);
@@ -817,7 +840,7 @@ body::before {
     width: 100%;
   }
 
-  .btn-primary-export, .btn-secondary-export {
+  .btn-primary-export, .btn-trackman-export, .btn-secondary-export {
     width: 100%;
     justify-content: center;
   }

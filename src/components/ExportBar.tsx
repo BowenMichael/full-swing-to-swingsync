@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, FileSpreadsheet, Code, Check } from 'lucide-react';
+import { Download, FileSpreadsheet, Code, Check, Target } from 'lucide-react';
 import { ParsedSessionData } from '../types.js';
 
 interface ExportBarProps {
@@ -10,7 +10,7 @@ interface ExportBarProps {
 export const ExportBar: React.FC<ExportBarProps> = ({ data, url }) => {
   const [downloadingFormat, setDownloadingFormat] = useState<string | null>(null);
 
-  const handleDownload = (format: 'swingsync' | 'raw' | 'json') => {
+  const handleDownload = (format: 'swingsync' | 'trackman' | 'raw' | 'json') => {
     setDownloadingFormat(format);
     const endpoint = `/api/export/${format}?url=${encodeURIComponent(url || data.shareUrl)}`;
     
@@ -32,10 +32,10 @@ export const ExportBar: React.FC<ExportBarProps> = ({ data, url }) => {
       <div className="export-info">
         <h3>
           <FileSpreadsheet size={20} color="var(--emerald-primary)" />
-          SwingSync Ready Export
+          Export Session Data
         </h3>
         <p>
-          Formatted with {data.session.totalShots} shots ready for direct import into SwingSync analytics.
+          {data.session.totalShots} shots ready for direct import into SwingSync, Trackman, or spreadsheet analysis.
         </p>
       </div>
 
@@ -44,16 +44,36 @@ export const ExportBar: React.FC<ExportBarProps> = ({ data, url }) => {
           type="button"
           className="btn-primary-export"
           onClick={() => handleDownload('swingsync')}
+          title="Download CSV formatted for SwingSync"
         >
           {downloadingFormat === 'swingsync' ? (
             <>
               <Check size={18} />
-              <span>Downloaded CSV!</span>
+              <span>Downloaded!</span>
             </>
           ) : (
             <>
               <Download size={18} />
-              <span>Download SwingSync CSV</span>
+              <span>SwingSync CSV</span>
+            </>
+          )}
+        </button>
+
+        <button
+          type="button"
+          className="btn-trackman-export"
+          onClick={() => handleDownload('trackman')}
+          title="Download CSV formatted with Trackman column schema"
+        >
+          {downloadingFormat === 'trackman' ? (
+            <>
+              <Check size={18} />
+              <span>Downloaded!</span>
+            </>
+          ) : (
+            <>
+              <Target size={18} />
+              <span>Trackman CSV</span>
             </>
           )}
         </button>

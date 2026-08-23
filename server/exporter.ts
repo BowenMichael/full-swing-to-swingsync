@@ -175,6 +175,90 @@ export function generateSwingSyncCsv(parsed: ParsedSessionResponse): string {
   return rows.map((r) => r.join(',')).join('\r\n');
 }
 
+export function generateTrackmanCsv(parsed: ParsedSessionResponse): string {
+  const headers = [
+    'Shot Number',
+    'Date Time',
+    'Club',
+    'Club Speed',
+    'Ball Speed',
+    'Smash Factor',
+    'Attack Angle',
+    'Club Path',
+    'Face Angle',
+    'Face To Path',
+    'Swing Direction',
+    'Dynamic Loft',
+    'Launch Angle',
+    'Launch Direction',
+    'Spin Rate',
+    'Spin Axis',
+    'Spin Loft',
+    'Carry',
+    'Total',
+    'Side',
+    'Side Total',
+    'Carry Side',
+    'Total Side',
+    'Curve',
+    'Height',
+    'Max Height',
+    'Landing Angle',
+    'Hang Time',
+    'Low Point Distance',
+    'Impact Height',
+    'Impact Offset',
+    'Tempo',
+  ];
+
+  const rows: string[][] = [headers];
+
+  for (const shot of parsed.shots) {
+    const dateTimeStr = shot.timestamp ? new Date(shot.timestamp * 1000).toISOString() : '';
+    const curveVal =
+      shot.sideTotal != null && shot.side != null ? (shot.sideTotal - shot.side).toFixed(1) : '';
+
+    rows.push([
+      String(shot.shotNumber),
+      dateTimeStr,
+      escapeCsvField(shot.clubName || 'Unknown'),
+      shot.clubSpeed != null ? shot.clubSpeed.toFixed(1) : '',
+      shot.ballSpeed != null ? shot.ballSpeed.toFixed(1) : '',
+      shot.smashFactor != null ? shot.smashFactor.toFixed(2) : '',
+      shot.attackAngle != null ? shot.attackAngle.toFixed(1) : '',
+      shot.clubPath != null ? shot.clubPath.toFixed(1) : '',
+      shot.faceAngle != null ? shot.faceAngle.toFixed(1) : '',
+      shot.faceToPath != null ? shot.faceToPath.toFixed(1) : '',
+      shot.clubPath != null ? shot.clubPath.toFixed(1) : '', // Swing Direction
+      shot.dynamicLoft != null ? shot.dynamicLoft.toFixed(1) : '',
+      shot.launchAngle != null ? shot.launchAngle.toFixed(1) : '',
+      shot.horizontalLaunchAngle != null ? shot.horizontalLaunchAngle.toFixed(1) : '',
+      shot.spinRate != null ? Math.round(shot.spinRate).toString() : '',
+      shot.spinAxis != null ? shot.spinAxis.toFixed(1) : '',
+      shot.dynamicLoft != null && shot.attackAngle != null
+        ? (shot.dynamicLoft - shot.attackAngle).toFixed(1)
+        : '',
+      shot.carryDistance != null ? shot.carryDistance.toFixed(1) : '',
+      shot.totalDistance != null ? shot.totalDistance.toFixed(1) : '',
+      shot.side != null ? shot.side.toFixed(1) : '',
+      shot.sideTotal != null ? shot.sideTotal.toFixed(1) : '',
+      shot.side != null ? shot.side.toFixed(1) : '', // Carry Side
+      shot.sideTotal != null ? shot.sideTotal.toFixed(1) : '', // Total Side
+      curveVal,
+      shot.apex != null ? shot.apex.toFixed(1) : '', // Height
+      shot.apex != null ? shot.apex.toFixed(1) : '', // Max Height
+      shot.descentAngle != null ? shot.descentAngle.toFixed(1) : '',
+      '', // Hang Time
+      '', // Low Point Distance
+      '', // Impact Height
+      '', // Impact Offset
+      '', // Tempo
+    ]);
+  }
+
+  return rows.map((r) => r.join(',')).join('\r\n');
+}
+
 export function generateRawCsv(parsed: ParsedSessionResponse): string {
   const headers = [
     'Shot Number',

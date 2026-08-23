@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import { fetchFullSwingData, extractShareId } from './extractor.js';
-import { parseSessionData, generateSwingSyncCsv, generateRawCsv } from './exporter.js';
+import { parseSessionData, generateSwingSyncCsv, generateTrackmanCsv, generateRawCsv } from './exporter.js';
 import { recordPageView, recordEvent, getStatsSummary } from './analytics.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -93,6 +93,37 @@ app.get('/api/export/swingsync', async (req: Request, res: Response) => {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Export failed.';
     console.error('SwingSync export error:', message);
+    return res.status(500).send(`Error: ${message}`);
+  }
+});
+
+// API: Export Trackman CSV
+app.get('/api/export/trackman', async (req: Request, res: Response) => {
+  try {
+    const url = req.query.url as string;
+    if (!url) {
+      return res.status(400).send('Missing url parameter.');
+    }
+
+    const shareId = extractShareId(url);
+    const rawData = await fetchFullSwingData(url);
+    const parsed = parseSessionData(rawData);
+    const csvContent = generateTrackmanCsv(parsed);
+
+    // Record download event
+    recordEvent('download_trackman', req.headers['user-agent']);
+
+    const dateStr = parsed.session.startTimestamp
+      ? new Date(parsed.session.startTimestamp * 1000).toISOString().split('T')[0]
+      : 'session';
+    const filename = `trackman_${dateStr}_${shareId.substring(0, 8)}.csv`;
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    return res.send(csvContent);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Export failed.';
+    console.error('Trackman export error:', message);
     return res.status(500).send(`Error: ${message}`);
   }
 });

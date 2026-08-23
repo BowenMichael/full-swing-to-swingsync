@@ -7,10 +7,11 @@ interface AnalyticsData {
   totalUniqueVisitors: number;
   totalExtractions: number;
   totalSwingSyncDownloads: number;
+  totalTrackmanDownloads: number;
   totalRawDownloads: number;
   visitorHashes: Record<string, string>; // hash -> firstSeen
   events: Array<{
-    type: 'pageview' | 'extract' | 'download_swingsync' | 'download_raw' | 'download_json';
+    type: 'pageview' | 'extract' | 'download_swingsync' | 'download_trackman' | 'download_raw' | 'download_json';
     timestamp: string;
     userAgent?: string;
     country?: string;
@@ -41,6 +42,7 @@ function loadStats(): AnalyticsData {
     totalUniqueVisitors: 0,
     totalExtractions: 0,
     totalSwingSyncDownloads: 0,
+    totalTrackmanDownloads: 0,
     totalRawDownloads: 0,
     visitorHashes: {},
     events: [],
@@ -86,11 +88,12 @@ export function recordPageView(ip?: string, userAgent?: string, country?: string
 }
 
 export function recordEvent(
-  type: 'extract' | 'download_swingsync' | 'download_raw' | 'download_json',
+  type: 'extract' | 'download_swingsync' | 'download_trackman' | 'download_raw' | 'download_json',
   userAgent?: string
 ): void {
   if (type === 'extract') stats.totalExtractions += 1;
   if (type === 'download_swingsync') stats.totalSwingSyncDownloads += 1;
+  if (type === 'download_trackman') stats.totalTrackmanDownloads = (stats.totalTrackmanDownloads || 0) + 1;
   if (type === 'download_raw' || type === 'download_json') stats.totalRawDownloads += 1;
 
   stats.events.unshift({
@@ -111,6 +114,7 @@ export function getStatsSummary() {
     totalUniqueVisitors: stats.totalUniqueVisitors,
     totalExtractions: stats.totalExtractions,
     totalSwingSyncDownloads: stats.totalSwingSyncDownloads,
+    totalTrackmanDownloads: stats.totalTrackmanDownloads || 0,
     totalRawDownloads: stats.totalRawDownloads,
     recentEvents: stats.events.slice(0, 30),
   };
