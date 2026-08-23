@@ -120,55 +120,30 @@ function escapeCsvField(field: unknown): string {
 
 export function generateSwingSyncCsv(parsed: ParsedSessionResponse): string {
   const headers = [
-    'Shot Number',
-    'Date Time',
+    'ShotNumber',
     'Club',
-    'Club Type',
-    'Club Speed (mph)',
-    'Ball Speed (mph)',
-    'Smash Factor',
-    'Carry Distance (yds)',
-    'Total Distance (yds)',
-    'Launch Angle (deg)',
-    'Launch Direction (deg)',
-    'Spin Rate (rpm)',
-    'Spin Axis (deg)',
-    'Club Path (deg)',
-    'Face Angle (deg)',
-    'Face to Path (deg)',
-    'Attack Angle (deg)',
-    'Apex Height (yds)',
-    'Descent Angle (deg)',
-    'Side Distance (yds)',
-    'Side Total (yds)',
+    'BallSpeed',
+    'ClubSpeed',
+    'SmashFactor',
+    'LaunchAngle',
+    'SpinRate',
+    'Carry',
+    'Total',
   ];
 
   const rows: string[][] = [headers];
 
   for (const shot of parsed.shots) {
-    const dateTimeStr = shot.timestamp ? new Date(shot.timestamp * 1000).toISOString() : '';
     rows.push([
       String(shot.shotNumber),
-      dateTimeStr,
       escapeCsvField(shot.clubName || 'Unknown'),
-      escapeCsvField(shot.clubType || ''),
-      shot.clubSpeed != null ? shot.clubSpeed.toFixed(1) : '',
       shot.ballSpeed != null ? shot.ballSpeed.toFixed(1) : '',
+      shot.clubSpeed != null ? shot.clubSpeed.toFixed(1) : '',
       shot.smashFactor != null ? shot.smashFactor.toFixed(2) : '',
+      shot.launchAngle != null ? shot.launchAngle.toFixed(1) : '',
+      shot.spinRate != null ? Math.round(shot.spinRate).toString() : '',
       shot.carryDistance != null ? shot.carryDistance.toFixed(1) : '',
       shot.totalDistance != null ? shot.totalDistance.toFixed(1) : '',
-      shot.launchAngle != null ? shot.launchAngle.toFixed(1) : '',
-      shot.horizontalLaunchAngle != null ? shot.horizontalLaunchAngle.toFixed(1) : '',
-      shot.spinRate != null ? Math.round(shot.spinRate).toString() : '',
-      shot.spinAxis != null ? shot.spinAxis.toFixed(1) : '',
-      shot.clubPath != null ? shot.clubPath.toFixed(1) : '',
-      shot.faceAngle != null ? shot.faceAngle.toFixed(1) : '',
-      shot.faceToPath != null ? shot.faceToPath.toFixed(1) : '',
-      shot.attackAngle != null ? shot.attackAngle.toFixed(1) : '',
-      shot.apex != null ? shot.apex.toFixed(1) : '',
-      shot.descentAngle != null ? shot.descentAngle.toFixed(1) : '',
-      shot.side != null ? shot.side.toFixed(1) : '',
-      shot.sideTotal != null ? shot.sideTotal.toFixed(1) : '',
     ]);
   }
 
