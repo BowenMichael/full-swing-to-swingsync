@@ -1,7 +1,11 @@
 import React from 'react';
-import { Target, ExternalLink } from 'lucide-react';
+import { Target, ExternalLink, BarChart3 } from 'lucide-react';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onOpenStats?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onOpenStats }) => {
   return (
     <header className="app-header">
       <div className="brand">
@@ -18,6 +22,18 @@ export const Header: React.FC = () => {
       </div>
 
       <div className="header-links">
+        {onOpenStats && (
+          <button
+            type="button"
+            className="link-btn"
+            onClick={onOpenStats}
+            title="View website traffic and extraction counts"
+          >
+            <BarChart3 size={15} color="var(--emerald-primary)" />
+            <span>Live Traffic</span>
+          </button>
+        )}
+
         <a
           href="https://swingsync.com"
           target="_blank"

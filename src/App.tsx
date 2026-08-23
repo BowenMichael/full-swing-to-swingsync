@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header.js';
 import { UrlInput } from './components/UrlInput.js';
 import { SessionSummary } from './components/SessionSummary.js';
 import { ExportBar } from './components/ExportBar.js';
 import { ShotTable } from './components/ShotTable.js';
+import { StatsModal } from './components/StatsModal.js';
 import { ParsedSessionData } from './types.js';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, BarChart2 } from 'lucide-react';
 
 const DEMO_URL = 'https://myfullswinggolf.com/lm/share/5c6af3dc-9e48-412b-a041-a41726b25956';
 
@@ -15,6 +16,17 @@ export const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [sessionData, setSessionData] = useState<ParsedSessionData | null>(null);
   const [selectedClub, setSelectedClub] = useState<string | null>(null);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
+
+  // Send visitor beacon on page load
+  useEffect(() => {
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    }).catch(() => {
+      // Ignore background tracking errors
+    });
+  }, []);
 
   const handleExtract = async (targetUrl = url) => {
     if (!targetUrl.trim()) return;
@@ -55,7 +67,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="app-container">
-      <Header />
+      <Header onOpenStats={() => setIsStatsOpen(true)} />
 
       <UrlInput
         url={url}
@@ -94,9 +106,28 @@ export const App: React.FC = () => {
 
       <footer className="app-footer">
         <p>
-          Full Swing to SwingSync CSV Extractor &bull; Built with React, TypeScript & Node.js &bull; Ready for Render
+          Full Swing to SwingSync CSV Extractor &bull; Built with React, TypeScript & Node.js
         </p>
+        <button
+          type="button"
+          onClick={() => setIsStatsOpen(true)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-muted)',
+            fontSize: '0.75rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.3rem',
+          }}
+        >
+          <BarChart2 size={13} color="var(--emerald-primary)" />
+          <span>View Site Traffic & Usage Stats</span>
+        </button>
       </footer>
+
+      <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} />
     </div>
   );
 };

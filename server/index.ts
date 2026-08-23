@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import { fetchFullSwingData, extractShareId } from './extractor.js';
 import { parseSessionData, generateSwingSyncCsv, generateRawCsv } from './exporter.js';
+import { recordPageView, recordEvent, getStatsSummary } from './analytics.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,12 +13,32 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Enable trust proxy for Render load balancers (so req.ip is accurate)
+app.set('trust proxy', 1);
+
 app.use(cors());
 app.use(express.json());
 
 // API: Health check
 app.get('/api/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// API: Visitor tracking beacon
+app.post('/api/track', (req: Request, res: Response) => {
+  const ip = req.ip || req.headers['x-forwarded-for'] as string || req.socket.remoteAddress;
+  const userAgent = req.headers['user-agent'];
+  const country = (req.headers['cf-ipcountry'] || req.headers['x-render-client-country'] || '') as string;
+  recordPageView(ip, userAgent, country);
+  res.json({ success: true });
+});
+
+// API: Public / Admin stats summary
+app.get('/api/stats', (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    stats: getStatsSummary(),
+  });
 });
 
 // API: Extract session data
@@ -30,6 +51,9 @@ app.post('/api/extract', async (req: Request, res: Response) => {
 
     const rawData = await fetchFullSwingData(url);
     const parsed = parseSessionData(rawData);
+
+    // Record extraction analytics event
+    recordEvent('extract', req.headers['user-agent']);
 
     return res.json({
       success: true,
@@ -54,6 +78,9 @@ app.get('/api/export/swingsync', async (req: Request, res: Response) => {
     const rawData = await fetchFullSwingData(url);
     const parsed = parseSessionData(rawData);
     const csvContent = generateSwingSyncCsv(parsed);
+
+    // Record download event
+    recordEvent('download_swingsync', req.headers['user-agent']);
 
     const dateStr = parsed.session.startTimestamp
       ? new Date(parsed.session.startTimestamp * 1000).toISOString().split('T')[0]
@@ -83,6 +110,9 @@ app.get('/api/export/raw', async (req: Request, res: Response) => {
     const parsed = parseSessionData(rawData);
     const csvContent = generateRawCsv(parsed);
 
+    // Record download event
+    recordEvent('download_raw', req.headers['user-agent']);
+
     const filename = `fullswing_raw_${shareId.substring(0, 8)}.csv`;
 
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
@@ -105,6 +135,10 @@ app.get('/api/export/json', async (req: Request, res: Response) => {
 
     const shareId = extractShareId(url);
     const rawData = await fetchFullSwingData(url);
+
+    // Record download event
+    recordEvent('download_json', req.headers['user-agent']);
+
     const filename = `fullswing_session_${shareId.substring(0, 8)}.json`;
 
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
