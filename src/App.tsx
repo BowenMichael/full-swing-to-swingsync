@@ -92,6 +92,9 @@ export const App: React.FC = () => {
 
       {sessionData && (
         <main className="dashboard">
+          {/* Main Action: Export directly below URL input */}
+          <ExportBar data={sessionData} url={url} />
+
           <SessionSummary
             data={sessionData}
             selectedClub={selectedClub}
@@ -100,8 +103,6 @@ export const App: React.FC = () => {
               if (club) trackEvent('filter_club', { club });
             }}
           />
-
-          <ExportBar data={sessionData} url={url} />
 
           <ShotTable
             shots={sessionData.shots}
