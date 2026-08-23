@@ -20,6 +20,26 @@ A modern, mobile-responsive web application built with **React (TypeScript)** an
 
 ---
 
+## 📲 How to Import CSV into SwingSync (By Platform)
+
+### 📱 iOS (iPhone / iPad)
+1. **Download**: Tap the green **"SwingSync CSV"** button (Safari will save the file to your device's **Files** app under `Downloads`).
+2. **Open SwingSync**: Launch the SwingSync app or visit [swingsync.com](https://swingsync.com).
+3. **Import**: Navigate to **Sessions** ➔ Tap **Import CSV / Upload** ➔ Choose the downloaded `swingsync_*.csv` file from your **Files** app.
+4. **Done**: Your shot shapes, speeds, carry distances, and club performance will populate immediately.
+
+### 🤖 Android
+1. **Download**: Tap **"SwingSync CSV"** (saves into your Android `Downloads` folder).
+2. **Open SwingSync**: Open the SwingSync app or mobile web dashboard.
+3. **Import**: Go to **Sessions** ➔ Tap **Import Session** ➔ Select the CSV from your `Downloads` directory.
+
+### 💻 Desktop (Mac / Windows PC)
+1. **Download**: Click **"SwingSync CSV"** to save to your computer.
+2. **Open Dashboard**: Go to [swingsync.com](https://swingsync.com) and log into your account.
+3. **Upload**: Navigate to **Sessions / Shot Table** ➔ Drag and drop or upload your `swingsync_*.csv` file.
+
+---
+
 ## Deploying to Render
 
 ### Method 1: Blueprint Deployment (Recommended)

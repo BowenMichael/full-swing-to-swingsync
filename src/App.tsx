@@ -3,6 +3,7 @@ import { Header } from './components/Header.js';
 import { UrlInput } from './components/UrlInput.js';
 import { SessionSummary } from './components/SessionSummary.js';
 import { ExportBar } from './components/ExportBar.js';
+import { ImportInstructions } from './components/ImportInstructions.js';
 import { ShotTable } from './components/ShotTable.js';
 import { ParsedSessionData } from './types.js';
 import { initGoogleAnalytics, trackEvent } from './utils/analytics.js';
@@ -94,6 +95,9 @@ export const App: React.FC = () => {
         <main className="dashboard">
           {/* Main Action: Export directly below URL input */}
           <ExportBar data={sessionData} url={url} />
+
+          {/* Platform Import Instructions */}
+          <ImportInstructions />
 
           <SessionSummary
             data={sessionData}
