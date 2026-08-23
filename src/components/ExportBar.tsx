@@ -22,10 +22,26 @@ export const ExportBar: React.FC<ExportBarProps> = ({ data, url }) => {
       session_date: data.session.formattedDate,
     });
 
-    // Create hidden anchor to trigger standard browser file download
+    const dateStr = data.session.startTimestamp
+      ? new Date(data.session.startTimestamp * 1000).toISOString().split('T')[0]
+      : 'session';
+    const idPrefix = (data.shareUrl || '').replace(/[^a-zA-Z0-9]/g, '').substring(0, 8) || 'export';
+
+    let filename = `export_${dateStr}.csv`;
+    if (format === 'swingsync') {
+      filename = `swingsync_${dateStr}_${idPrefix}.csv`;
+    } else if (format === 'trackman') {
+      filename = `trackman_${dateStr}_${idPrefix}.csv`;
+    } else if (format === 'raw') {
+      filename = `fullswing_raw_${dateStr}_${idPrefix}.csv`;
+    } else if (format === 'json') {
+      filename = `fullswing_${dateStr}_${idPrefix}.json`;
+    }
+
+    // Create hidden anchor to trigger browser download with explicit filename & extension
     const a = document.createElement('a');
     a.href = endpoint;
-    a.download = '';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -52,12 +68,12 @@ export const ExportBar: React.FC<ExportBarProps> = ({ data, url }) => {
           type="button"
           className="btn-primary-export"
           onClick={() => handleDownload('swingsync')}
-          title="Download CSV formatted for SwingSync"
+          title="Download CSV formatted for SwingSync (.csv)"
         >
           {downloadingFormat === 'swingsync' ? (
             <>
               <Check size={18} />
-              <span>Downloaded!</span>
+              <span>Downloaded .CSV!</span>
             </>
           ) : (
             <>
@@ -71,12 +87,12 @@ export const ExportBar: React.FC<ExportBarProps> = ({ data, url }) => {
           type="button"
           className="btn-trackman-export"
           onClick={() => handleDownload('trackman')}
-          title="Download CSV formatted with Trackman column schema"
+          title="Download CSV formatted with Trackman column schema (.csv)"
         >
           {downloadingFormat === 'trackman' ? (
             <>
               <Check size={18} />
-              <span>Downloaded!</span>
+              <span>Downloaded .CSV!</span>
             </>
           ) : (
             <>
@@ -90,7 +106,7 @@ export const ExportBar: React.FC<ExportBarProps> = ({ data, url }) => {
           type="button"
           className="btn-secondary-export"
           onClick={() => handleDownload('raw')}
-          title="Download Full Swing raw metric CSV"
+          title="Download Full Swing raw metric CSV (.csv)"
         >
           <FileSpreadsheet size={16} />
           <span>Raw CSV</span>
@@ -100,7 +116,7 @@ export const ExportBar: React.FC<ExportBarProps> = ({ data, url }) => {
           type="button"
           className="btn-secondary-export"
           onClick={() => handleDownload('json')}
-          title="Download Full Swing raw JSON data"
+          title="Download Full Swing raw JSON data (.json)"
         >
           <Code size={16} />
           <span>JSON</span>
