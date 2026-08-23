@@ -409,11 +409,18 @@ body::before {
   border-radius: var(--radius-lg);
   padding: 1.25rem 1.5rem;
   display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.export-top-row {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
-  box-shadow: var(--shadow-sm);
+  width: 100%;
 }
 
 .export-info h3 {
@@ -505,44 +512,29 @@ body::before {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Instructions Card */
-.instructions-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.2s ease;
-}
-
-.instructions-toggle-header {
-  padding: 0.85rem 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.02);
-  user-select: none;
-  transition: background 0.2s ease;
-}
-
-.instructions-toggle-header:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.instructions-body {
-  padding: 1rem 1.25rem;
+/* Instructions Section inside Export Card */
+.instructions-section {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding-top: 0.85rem;
   border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  animation: fadeIn 0.2s ease-out;
+  gap: 0.6rem;
+}
+
+.instructions-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .platform-tab-bar {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex-wrap: wrap;
 }
 
@@ -550,13 +542,13 @@ body::before {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  padding: 0.4rem 0.85rem;
+  padding: 0.35rem 0.75rem;
   border-radius: var(--radius-sm);
-  font-size: 0.825rem;
+  font-size: 0.8rem;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -572,11 +564,18 @@ body::before {
   border-color: var(--emerald-primary);
 }
 
+.platform-content {
+  background: rgba(10, 13, 20, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.9rem;
+}
+
 .instruction-steps {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin: 0;
   padding: 0;
 }
@@ -584,10 +583,10 @@ body::before {
 .instruction-steps li {
   display: flex;
   align-items: flex-start;
-  gap: 0.6rem;
-  font-size: 0.85rem;
+  gap: 0.5rem;
+  font-size: 0.825rem;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .step-check {
