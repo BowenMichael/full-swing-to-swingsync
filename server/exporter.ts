@@ -118,32 +118,225 @@ function escapeCsvField(field: unknown): string {
   return str;
 }
 
+function classifyShot(shot: FullSwingShot & { faceToPath: number | null }): string {
+  const hla = shot.horizontalLaunchAngle;
+  const ftp = shot.faceToPath;
+
+  if (hla == null || ftp == null) return '';
+
+  const isPush = hla > 1.5;
+  const isPull = hla < -1.5;
+  const isSlice = ftp > 2.0;
+  const isFade = ftp > 0.8 && ftp <= 2.0;
+  const isHook = ftp < -2.0;
+  const isDraw = ftp < -0.8 && ftp >= -2.0;
+
+  if (isPush && isSlice) return 'Push Slice';
+  if (isPush && isFade) return 'Push Fade';
+  if (isPush && isDraw) return 'Push Draw';
+  if (isPush && isHook) return 'Push Hook';
+  if (isPush) return 'Push';
+
+  if (isPull && isHook) return 'Pull Hook';
+  if (isPull && isDraw) return 'Pull Draw';
+  if (isPull && isSlice) return 'Pull Slice';
+  if (isPull && isFade) return 'Pull Fade';
+  if (isPull) return 'Pull';
+
+  if (isSlice) return 'Slice';
+  if (isFade) return 'Straight Fade';
+  if (isDraw) return 'Straight Draw';
+  if (isHook) return 'Hook';
+
+  return 'Straight';
+}
+
 export function generateSwingSyncCsv(parsed: ParsedSessionResponse): string {
+  // Exact SwingSync Export Header Schema
   const headers = [
-    'ShotNumber',
-    'Club',
-    'BallSpeed',
-    'ClubSpeed',
-    'SmashFactor',
-    'LaunchAngle',
-    'SpinRate',
+    'Shot number',
+    'Date',
+    'Classification',
+    'Club type',
+    'Club name',
     'Carry',
     'Total',
+    'Offline',
+    'Offline carry',
+    'Shot angle',
+    'Peak height',
+    'Hang time',
+    'Club speed',
+    'Ball speed',
+    'Smash factor',
+    'Push/pull',
+    'Launch angle',
+    'Landing angle',
+    'Backspin',
+    'Sidespin',
+    'Curve',
+    'Curve factor',
+    'Angle of attack',
+    'Face to target',
+    'Club path',
+    'Face to path',
+    'Face impact X',
+    'Face impact Y',
+    'Strokes gained',
+    'Club score',
+    'Target score',
+    'Launch score',
+    'Direction score',
+    'Shape score',
+    'Total score',
   ];
 
-  const rows: string[][] = [headers];
+  const units = [
+    '',
+    '',
+    '',
+    '',
+    '',
+    '[yds]',
+    '[yds]',
+    '[yds]',
+    '[yds]',
+    '[°]',
+    '[yds]',
+    '[seconds]',
+    '[mph]',
+    '[mph]',
+    '',
+    '[°]',
+    '[°]',
+    '[°]',
+    '[rpm]',
+    '[rpm]',
+    '[yds]',
+    '',
+    '[°]',
+    '[°]',
+    '[°]',
+    '[°]',
+    '[mm]',
+    '[mm]',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+  ];
+
+  const rows: string[][] = [headers, units];
 
   for (const shot of parsed.shots) {
+    const dateTimeStr = shot.timestamp
+      ? new Date(shot.timestamp * 1000).toISOString()
+      : '';
+
+    const classification = classifyShot(shot);
+    const clubType = shot.clubName || shot.clubType || 'Default';
+    const clubName = 'Default';
+
+    const carry = shot.carryDistance != null ? shot.carryDistance.toFixed(1) : '';
+    const total = shot.totalDistance != null ? shot.totalDistance.toFixed(1) : '';
+    const offline = shot.sideTotal != null ? Math.abs(shot.sideTotal).toFixed(1) : '';
+    const offlineCarry = shot.side != null ? Math.abs(shot.side).toFixed(1) : '';
+    const shotAngle = shot.horizontalLaunchAngle != null ? shot.horizontalLaunchAngle.toFixed(1) : '';
+    const peakHeight = shot.apex != null ? shot.apex.toFixed(1) : '';
+    const hangTime = '';
+
+    const clubSpeed = shot.clubSpeed != null ? shot.clubSpeed.toFixed(1) : '';
+    const ballSpeed = shot.ballSpeed != null ? shot.ballSpeed.toFixed(1) : '';
+    const smashFactor = shot.smashFactor != null ? shot.smashFactor.toFixed(1) : '';
+
+    // Push/Pull string e.g. "1.62 R" or "3.04 L"
+    const pushPull =
+      shot.horizontalLaunchAngle != null
+        ? `${Math.abs(shot.horizontalLaunchAngle).toFixed(2)} ${shot.horizontalLaunchAngle >= 0 ? 'R' : 'L'}`
+        : '';
+
+    const launchAngle = shot.launchAngle != null ? shot.launchAngle.toFixed(1) : '';
+    const landingAngle = shot.descentAngle != null ? shot.descentAngle.toFixed(1) : '';
+
+    // Backspin & Sidespin decomposition from spin rate & spin axis
+    let backspin = '';
+    let sidespin = '';
+    if (shot.spinRate != null) {
+      if (shot.spinAxis != null) {
+        const rad = (shot.spinAxis * Math.PI) / 180;
+        const bSpin = Math.round(Math.abs(shot.spinRate * Math.cos(rad)));
+        const sSpin = Math.round(Math.abs(shot.spinRate * Math.sin(rad)));
+        backspin = bSpin.toString();
+        sidespin = sSpin > 0 ? `${sSpin} ${shot.spinAxis >= 0 ? 'R' : 'L'}` : '0';
+      } else {
+        backspin = Math.round(shot.spinRate).toString();
+      }
+    }
+
+    const curve =
+      shot.sideTotal != null && shot.side != null
+        ? Math.abs(shot.sideTotal - shot.side).toFixed(1)
+        : '';
+    const curveFactor = '';
+    const attackAngle = shot.attackAngle != null ? shot.attackAngle.toFixed(1) : '';
+
+    // Face to Target (e.g. "1.98° open" or "2.13° closed")
+    const faceToTarget =
+      shot.faceAngle != null
+        ? `${Math.abs(shot.faceAngle).toFixed(2)}° ${shot.faceAngle >= 0 ? 'open' : 'closed'}`
+        : '';
+
+    // Club Path (e.g. "1.73° in-to-out" or "2.24° out-to-in")
+    const clubPath =
+      shot.clubPath != null
+        ? `${Math.abs(shot.clubPath).toFixed(2)}° ${shot.clubPath >= 0 ? 'in-to-out' : 'out-to-in'}`
+        : '';
+
+    // Face to Path (e.g. "4.22° open" or "1.67° closed")
+    const faceToPath =
+      shot.faceToPath != null
+        ? `${Math.abs(shot.faceToPath).toFixed(2)}° ${shot.faceToPath >= 0 ? 'open' : 'closed'}`
+        : '';
+
     rows.push([
       String(shot.shotNumber),
-      escapeCsvField(shot.clubName || 'Unknown'),
-      shot.ballSpeed != null ? shot.ballSpeed.toFixed(1) : '',
-      shot.clubSpeed != null ? shot.clubSpeed.toFixed(1) : '',
-      shot.smashFactor != null ? shot.smashFactor.toFixed(2) : '',
-      shot.launchAngle != null ? shot.launchAngle.toFixed(1) : '',
-      shot.spinRate != null ? Math.round(shot.spinRate).toString() : '',
-      shot.carryDistance != null ? shot.carryDistance.toFixed(1) : '',
-      shot.totalDistance != null ? shot.totalDistance.toFixed(1) : '',
+      dateTimeStr,
+      classification,
+      escapeCsvField(clubType),
+      escapeCsvField(clubName),
+      carry,
+      total,
+      offline,
+      offlineCarry,
+      shotAngle,
+      peakHeight,
+      hangTime,
+      clubSpeed,
+      ballSpeed,
+      smashFactor,
+      pushPull,
+      launchAngle,
+      landingAngle,
+      backspin,
+      sidespin,
+      curve,
+      curveFactor,
+      attackAngle,
+      faceToTarget,
+      clubPath,
+      faceToPath,
+      '', // Face impact X
+      '', // Face impact Y
+      '', // Strokes gained
+      '', // Club score
+      '', // Target score
+      '', // Launch score
+      '', // Direction score
+      '', // Shape score
+      '', // Total score
     ]);
   }
 
