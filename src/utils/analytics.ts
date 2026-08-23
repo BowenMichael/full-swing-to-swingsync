@@ -7,21 +7,16 @@ declare global {
   }
 }
 
-export function initGoogleAnalytics(): void {
-  const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
-  if (gaId && gaId.startsWith('G-')) {
-    if (!window.gtag) {
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
-      document.head.appendChild(script);
+export const GA_MEASUREMENT_ID = 'G-ZPKE8L9TR7';
 
-      window.dataLayer = window.dataLayer || [];
+export function initGoogleAnalytics(): void {
+  // Ensure dataLayer & gtag are defined
+  if (typeof window !== 'undefined') {
+    window.dataLayer = window.dataLayer || [];
+    if (!window.gtag) {
       window.gtag = function () {
         window.dataLayer?.push(arguments);
       };
-      window.gtag('js', new Date());
-      window.gtag('config', gaId, { send_page_view: true });
     }
   }
 }
